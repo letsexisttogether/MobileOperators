@@ -39,7 +39,8 @@ CombinedModel::CombinedModel(QObject* const parent) noexcept
             const Operator op
             {
                 operatorQuery.value(0).toString(),
-                operatorQuery.value(1).toInt()
+                operatorQuery.value(1).toInt(),
+                country.Mcc
             };
 
             country.Operators.append(op);
@@ -47,34 +48,6 @@ CombinedModel::CombinedModel(QObject* const parent) noexcept
 
         m_Countries.append(country);
     }
-
-    /*
-    m_Countries =
-    {
-        {
-            "Ukraine", "UA", 255,
-            {
-                { "Kyivstar", 1 },
-                { "Vodafone", 2 }
-            }
-        },
-        {
-            "Poland", "PL", 260,
-            {
-                { "Orange", 3 },
-                { "Plus", 4 }
-            }
-        },
-        {
-            "Germany", "DE", 262,
-            {
-                { "Telekom", 5 },
-                { "O2", 6 }
-            }
-        },
-    };
-*/
-
 }
 
 QModelIndex CombinedModel::index(int row, int column,
@@ -184,7 +157,6 @@ QVariant CombinedModel::GetCountryData(const Country& country, const int role)
             return country.Code;
         case Role::Mcc:
             return country.Mcc;
-
         case Role::Level:
             return 0;
     }
@@ -201,7 +173,8 @@ QVariant CombinedModel::GetOperatorData(const Operator& op, const int role)
             return op.Name;
         case Role::Mnc:
             return op.Mnc;
-
+        case Role::Mcc:
+            return op.Mcc;
         case Role::Level:
             return 1;
     }
