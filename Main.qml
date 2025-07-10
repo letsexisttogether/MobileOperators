@@ -1,61 +1,26 @@
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Controls
-import Qt.labs.qmlmodels
+import QtQuick.Layouts
+import QtQuick.Window
 
-Window
-{
-    width: 640
-    height: 480
+ApplicationWindow {
+    width: 600
+    height: 400
     visible: true
-    title: qsTr("Hello World")
+    title: qsTr("Simple TreeView")
 
-    ListView
-    {
-        width: 500
-        height: 500
-        model: listModel
+    TreeView {
+        anchors.fill: parent
+        model: combinedModel
 
-        anchors.centerIn: parent
+        delegate: RowLayout {
+            spacing: 10
 
-        delegate: Column
-        {
-            Text { text: "Назва" + Name }
-            Text { text: "Країна" + Mcc }
-            Text { text: "Код" + Mnc }
-
-            Image
-            {
-                width: 16
-                height: 13
-                fillMode: Image.PreserveAspectFit
-
-                source: "file:///D:/Projects/MobileOperators/Resources/"
-                    + Mcc + "_" + Mnc + ".png"
-            }
-
-            Rectangle
-            {
-                height: 1
-                color: "gray"
-                width: parent.width
+            Text {
+                text: model.level === 0
+                      ? model.countryName + " (" + model.countryCode + ")"
+                      : "  → " + model.operatorName + " (MNC: " + model.mnc + ")"
             }
         }
     }
-
-    /*
-    OperatorDialog
-    {
-        id: myDialog
-        anchors.centerIn: parent
-    }
-
-    Button
-    {
-        text: "Показати діалог"
-        anchors.centerIn: parent
-        onClicked: myDialog.open()
-    }
-
-    */
 }

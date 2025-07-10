@@ -34,7 +34,9 @@ public:
 
         CountryName,
         CountryCode,
-        Mcc
+        Mcc,
+
+        Level
     };
 
 public:
@@ -52,6 +54,7 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
 
     QHash<int, QByteArray> roleNames() const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 
 private:
     QVariant GetCountryData(const Country& country, const int role)

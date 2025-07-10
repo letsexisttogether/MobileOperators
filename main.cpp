@@ -2,7 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
-#include "Model.hpp"
+#include "Model/CombinedModel.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -10,8 +10,8 @@ int main(int argc, char* argv[])
 
     QQmlApplicationEngine engine{};
 
-    Model model{};
-    engine.rootContext()->setContextProperty("listModel", &model);
+    CombinedModel model{};
+    engine.rootContext()->setContextProperty("combinedModel", &model);
 
     QObject::connect(
         &engine,

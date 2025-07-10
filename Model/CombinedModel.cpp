@@ -77,6 +77,7 @@ int CombinedModel::rowCount(const QModelIndex& index) const
 
 int CombinedModel::columnCount(const QModelIndex& index) const
 {
+    /*
     // Return the count of fields in Country
     if (!index.isValid())
     {
@@ -89,6 +90,9 @@ int CombinedModel::columnCount(const QModelIndex& index) const
     }
 
     return {};
+    */
+
+    return 1;
 }
 
 
@@ -123,9 +127,17 @@ QHash<int, QByteArray> CombinedModel::roleNames() const
         { Role::Mnc, "mnc" },
 
         { Role::CountryName, "countryName" },
-        { Role::CountryCode, "contryCode" },
-        { Role::Mcc, "mcc" }
+        { Role::CountryCode, "countryCode" },
+        { Role::Mcc, "mcc" },
+
+        { Role::Level, "level" }
     };
+}
+
+Qt::ItemFlags CombinedModel::flags(const QModelIndex& index) const
+{
+    return ((index.isValid()) ? (Qt::ItemIsEnabled | Qt::ItemIsSelectable)
+        :(Qt::NoItemFlags));
 }
 
 QVariant CombinedModel::GetCountryData(const Country& country, const int role)
@@ -139,6 +151,9 @@ QVariant CombinedModel::GetCountryData(const Country& country, const int role)
             return country.Code;
         case Role::Mcc:
             return country.Mcc;
+
+        case Role::Level:
+            return 0;
     }
 
     return {};
@@ -153,6 +168,9 @@ QVariant CombinedModel::GetOperatorData(const Operator& op, const int role)
             return op.Name;
         case Role::Mnc:
             return op.Mnc;
+
+        case Role::Level:
+            return 1;
     }
 
     return {};
