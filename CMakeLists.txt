@@ -21,23 +21,22 @@ find_package(Qt6 REQUIRED COMPONENTS
 qt_standard_project_setup(REQUIRES 6.5)
 
 qt_add_executable(appMobileOperators
-    main.cpp
+    Main.cpp
 )
 
 qt_add_qml_module(appMobileOperators
     URI MobileOperators
     VERSION 1.0
 
-    SOURCES StatusSender.hpp StatusSender.cpp
-    SOURCES TreeItem.hpp TreeItem.cpp
-    SOURCES TreeModel.hpp TreeModel.cpp
+    SOURCES SQL/SqlManager.hpp SQL/SqlManager.cpp
+    SOURCES Model/CombinedModel.hpp Model/CombinedModel.cpp
 
 
     QML_FILES Main.qml
-    QML_FILES TextRectangle.qml
-    QML_FILES OperatorDialog.qml
-    SOURCES Model.hpp Model.cpp
-    SOURCES SQL/SqlManager.hpp SQL/SqlManager.cpp
+    QML_FILES UI/TextRectangle.qml
+    QML_FILES UI/OperatorDialog.qml
+    QML_FILES UI/TreeElements/CountryComponent.qml
+    QML_FILES UI/TreeElements/OperatorComponent.qml
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -64,4 +63,10 @@ install(TARGETS appMobileOperators
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+add_custom_command(TARGET appMobileOperators POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/Resources
+    $<TARGET_FILE_DIR:appMobileOperators>/Resources
 )
