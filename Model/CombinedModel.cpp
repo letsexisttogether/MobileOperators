@@ -1,8 +1,54 @@
 #include "CombinedModel.hpp"
 
+#include <QStringLiteral>
+
+#include "SQL/SqlManager.hpp"
+
 CombinedModel::CombinedModel(QObject* const parent) noexcept
     : QAbstractItemModel{ parent }
 {
+    SqlManager& sqlManager = SqlManager::GetInstance();
+
+    QSqlQuery countryQuery
+    {
+        sqlManager.ExecuteQuery("SELECT name, code, mcc FROM countries")
+    };
+
+    while (countryQuery.next())
+    {
+        Country country
+        {
+            countryQuery.value(0).toString(),
+            countryQuery.value(1).toString(),
+            countryQuery.value(2).toInt()
+        };
+
+        const QString queryText
+        {
+            QString{"SELECT name, mnc FROM operators WHERE mcc = %1"}
+                .arg(country.Mcc)
+        };
+
+        QSqlQuery operatorQuery
+        {
+            sqlManager.ExecuteQuery(queryText)
+        };
+
+        while (operatorQuery.next())
+        {
+            const Operator op
+            {
+                operatorQuery.value(0).toString(),
+                operatorQuery.value(1).toInt()
+            };
+
+            country.Operators.append(op);
+        }
+
+        m_Countries.append(country);
+    }
+
+    /*
     m_Countries =
     {
         {
@@ -27,6 +73,8 @@ CombinedModel::CombinedModel(QObject* const parent) noexcept
             }
         },
     };
+*/
+
 }
 
 QModelIndex CombinedModel::index(int row, int column,
@@ -77,21 +125,6 @@ int CombinedModel::rowCount(const QModelIndex& index) const
 
 int CombinedModel::columnCount(const QModelIndex& index) const
 {
-    /*
-    // Return the count of fields in Country
-    if (!index.isValid())
-    {
-        return 3;
-    }
-    // Return the count of field in Operator
-    else if (index.internalId() == m_CountryIndex)
-    {
-        return 2;
-    }
-
-    return {};
-    */
-
     return 1;
 }
 

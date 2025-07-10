@@ -3,7 +3,8 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Window
 
-ApplicationWindow {
+ApplicationWindow
+{
     width: 600
     height: 400
     visible: true
