@@ -3,18 +3,29 @@
 #include <QQmlContext>
 
 #include "SQL/SqlManager.hpp"
-#include "Model/CombinedModel.hpp"
+#include "ViewModel/CombinedModel.hpp"
 
 int main(int argc, char* argv[])
 {
     QGuiApplication app{ argc, argv };
 
-    SqlManager::Init("QSQLITE", "D:\\Projects\\MobileOperators\\OM system.db");
+    const QString resourcesPath
+    {
+        QGuiApplication::applicationDirPath()
+            + "/Resources/"
+    };
+
+    SqlManager::Init("QSQLITE", resourcesPath
+        + "Database/OM system.db");
 
     QQmlApplicationEngine engine{};
 
     CombinedModel model{};
-    engine.rootContext()->setContextProperty("combinedModel", &model);
+    engine.rootContext()->setContextProperty("combinedModel",
+        &model);
+
+    engine.rootContext()->setContextProperty("resourcesPath",
+        resourcesPath);
 
     QObject::connect(
         &engine,
