@@ -2,71 +2,26 @@
 
 #include <QStringLiteral>
 
-#include "SQL/SqlManager.hpp"
-
 CombinedModel::CombinedModel(QObject* const parent) noexcept
     : QAbstractItemModel{ parent }
-{
-    SqlManager& sqlManager = SqlManager::GetInstance();
-
-    QSqlQuery countryQuery
-    {
-        sqlManager.ExecuteQuery("SELECT name, code, mcc FROM countries")
-    };
-
-    while (countryQuery.next())
-    {
-        Country country
-        {
-            countryQuery.value(0).toString(),
-            countryQuery.value(1).toString(),
-            countryQuery.value(2).toInt()
-        };
-
-        const QString queryText
-        {
-            QString{"SELECT name, mnc FROM operators WHERE mcc = %1"}
-                .arg(country.Mcc)
-        };
-
-        QSqlQuery operatorQuery
-        {
-            sqlManager.ExecuteQuery(queryText)
-        };
-
-        while (operatorQuery.next())
-        {
-            const Operator op
-            {
-                operatorQuery.value(0).toString(),
-                operatorQuery.value(1).toInt(),
-                country.Mcc
-            };
-
-            country.Operators.append(op);
-        }
-
-        m_Countries.append(country);
-    }
-}
+{}
 
 QModelIndex CombinedModel::index(int row, int column,
     const QModelIndex& index) const
 {
-    // Creates an index for PARENT element
-    if (!index.isValid() && row < m_Countries.size())
+    const auto& countries = m_Storage.GetData();
+
+    if (!index.isValid() && row < countries.size())
     {
         return createIndex(row, column, -1);
     }
 
-    // Creates an index for CHILD element
     if (index.internalId() == m_CountryIndex
-        && row < m_Countries[index.row()].Operators.size())
+        && row < countries[index.row()].Operators.size())
     {
         return createIndex(row, column, index.row());
     }
 
-    // Return empty (invalid) for the ROOT (internal QML) element
     return {};
 }
 
@@ -82,15 +37,15 @@ QModelIndex CombinedModel::parent(const QModelIndex& index) const
 
 int CombinedModel::rowCount(const QModelIndex& index) const
 {
-    // Return the count of countries
+    const auto& countries = m_Storage.GetData();
+
     if (!index.isValid())
     {
-        return m_Countries.size();
+        return countries.size();
     }
-    // Return the count of operators in a particular Country
     else if (index.internalId() == m_CountryIndex)
     {
-        return m_Countries[index.row()].Operators.size();
+        return countries[index.row()].Operators.size();
     }
 
     return {};
@@ -109,17 +64,19 @@ QVariant CombinedModel::data(const QModelIndex& index, int role) const
         return {};
     }
 
+    const auto& countries = m_Storage.GetData();
+
     const int id = index.internalId();
     const int row = index.row();
 
     if (id == m_CountryIndex)
     {
-        const Country& country = m_Countries[row];
+        const Country& country = countries[row];
 
         return GetCountryData(country, role);
     }
 
-    const Country& country = m_Countries[id];
+    const Country& country = countries[id];
     const Operator& op = country.Operators[row];
 
     return GetOperatorData(op, role);
@@ -144,6 +101,29 @@ Qt::ItemFlags CombinedModel::flags(const QModelIndex& index) const
 {
     return ((index.isValid()) ? (Qt::ItemIsEnabled | Qt::ItemIsSelectable)
         :(Qt::NoItemFlags));
+}
+
+void CombinedModel::AddOperator(const qint32 mcc, const qint32 mnc,
+    const QString& name) noexcept
+{
+
+}
+
+void CombinedModel::RemoveOperator(const qint32 mcc, const qint32 mnc) noexcept
+{
+    const auto searchResult = m_Storage.FindOperator(mcc, mnc);
+
+    if (!searchResult.Result)
+    {
+        return;
+    }
+
+    beginRemoveRows(index(searchResult.CountryIndex, 0),
+        searchResult.OperatorIndex, searchResult.OperatorIndex);
+
+    m_Storage.RemoveOperator(searchResult);
+
+    endRemoveRows();
 }
 
 QVariant CombinedModel::GetCountryData(const Country& country, const int role)
