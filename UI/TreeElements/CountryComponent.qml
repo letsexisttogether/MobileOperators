@@ -19,9 +19,12 @@ RowLayout
         fillMode: Image.PreserveAspectFit
     }
 
-    Text { text: componentData.countryName }
-    Text { text: componentData.countryCode }
-    Text { text: componentData.mcc }
+    Text
+    {
+        text: componentData.countryName + " ["
+            + componentData.countryCode + "] "
+            + componentData.mcc
+    }
 
     Button
     {

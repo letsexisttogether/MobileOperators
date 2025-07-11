@@ -120,9 +120,14 @@ void CombinedModel::AddOperator(const QString& name, const qint32 mcc,
 
     beginInsertRows(parent, operatorsCount, operatorsCount);
 
-    m_Storage.AddOperator(searchResult, name, mcc, mnc);
+    if (!m_Storage.AddOperator(searchResult, name, mcc, mnc))
+    {
 
-    endInsertRows();
+    }
+    else
+    {
+        endInsertRows();
+    }
 }
 
 void CombinedModel::UpdateOperator(const QString& name, const qint32 mcc,
@@ -135,7 +140,10 @@ void CombinedModel::UpdateOperator(const QString& name, const qint32 mcc,
         return;
     }
 
-    m_Storage.UpdateOperator(searchResult, name);
+    if (!m_Storage.UpdateOperator(searchResult, name))
+    {
+        return;
+    }
 
     const QModelIndex changedIndex
     {
@@ -158,9 +166,15 @@ void CombinedModel::RemoveOperator(const qint32 mcc, const qint32 mnc) noexcept
     beginRemoveRows(index(searchResult.CountryIndex, 0),
         searchResult.OperatorIndex, searchResult.OperatorIndex);
 
-    m_Storage.RemoveOperator(searchResult);
-
-    endRemoveRows();
+    if (!m_Storage.RemoveOperator(searchResult))
+    {
+        beginResetModel();
+        endResetModel();
+    }
+    else
+    {
+        endRemoveRows();
+    }
 }
 
 QVariant CombinedModel::GetCountryData(const Country& country, const int role)

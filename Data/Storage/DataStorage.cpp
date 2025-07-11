@@ -57,6 +57,7 @@ bool DataStorage::AddOperator(const OperatorSearchResult& searchResult,
     const QString& name, const qint32 mcc, const qint32 mnc) noexcept
 {
     const Operator op{ name, mnc, mcc };
+
     m_Countries[searchResult.CountryIndex].Operators.append(op);
 
     SqlManager& sqlManager = SqlManager::GetInstance();

@@ -16,9 +16,11 @@ RowLayout
         fillMode: Image.PreserveAspectFit
     }
 
-    Text { text: componentData.operatorName }
-    Text { text: componentData.mnc }
-    Text { text: componentData.mcc }
+    Text
+    {
+        text: componentData.operatorName + " ("
+            + componentData.mnc + ")"
+    }
 
     Button
     {
