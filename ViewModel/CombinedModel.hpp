@@ -51,8 +51,8 @@ public:
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
 public slots:
-    void AddOperator(const qint32 mcc, const qint32 mnc,
-        const QString& name) noexcept;
+    void AddOperator(const QString& name, const qint32 mcc, const qint32 mnc)
+        noexcept;
     void UpdateOperator(const QString& name, const qint32 mcc,
         const qint32 mnc) noexcept;
     void RemoveOperator(const qint32 mcc, const qint32 mnc) noexcept;

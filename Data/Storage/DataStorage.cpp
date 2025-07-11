@@ -53,21 +53,41 @@ DataStorage::DataStorage(QObject* const parent)
     }
 }
 
-// TODO: Finish the method
-DataStorage::OperatorSearchResult DataStorage::AddOperator
-    (const qint32 mcc, const qint32 mnc) noexcept
+bool DataStorage::AddOperator(const OperatorSearchResult& searchResult,
+    const QString& name, const qint32 mcc, const qint32 mnc) noexcept
 {
-    const OperatorSearchResult searchResult
-    {
-        FindOperator(mcc, mnc)
-    };
+    const Operator op{ name, mcc, mnc };
+    m_Countries[searchResult.CountryIndex].Operators.append(op);
 
-    if (searchResult.Result)
-    {
-        qDebug() << "[Warning] Such an operator already exists";
-    }
+    SqlManager& sqlManager = SqlManager::GetInstance();
 
-    return searchResult;
+    sqlManager.ExecuteQuery(QString{ "INSERT INTO operators "
+        "VALUES (%1, %2, '%3')"}
+        .arg(op.Mcc)
+        .arg(op.Mnc)
+        .arg(op.Name));
+
+    return true;
+}
+
+bool DataStorage::UpdateOperator(const OperatorSearchResult& searchResult,
+    const QString& name) noexcept
+{
+    auto& op = m_Countries[searchResult.CountryIndex]
+        .Operators[searchResult.OperatorIndex];
+
+    op.Name = name;
+
+    SqlManager& sqlManager = SqlManager::GetInstance();
+
+    sqlManager.ExecuteQuery(QString{ "UPDATE operators "
+        "SET name = '%1' "
+        "WHERE mcc = %2 AND mnc = %3" }
+        .arg(op.Name)
+        .arg(op.Mcc)
+        .arg(op.Mnc));
+
+    return true;
 }
 
 bool DataStorage::RemoveOperator(const OperatorSearchResult& searchResult)
@@ -103,7 +123,7 @@ DataStorage::OperatorSearchResult DataStorage::FindOperator
 {
     for (qsizetype i = 0; i < m_Countries.size(); ++i)
     {
-        const Country& country = m_Countries[i];
+        const auto& country = m_Countries[i];
 
         if (country.Mcc != mcc)
         {
@@ -118,6 +138,23 @@ DataStorage::OperatorSearchResult DataStorage::FindOperator
             {
                 return { i, j, true };
             }
+        }
+    }
+
+    return {};
+}
+
+
+DataStorage::OperatorSearchResult DataStorage::FindCountry
+    (const qint32 mcc) const noexcept
+{
+    for (qsizetype i = 0; i < m_Countries.size(); ++i)
+    {
+        const auto& country = m_Countries[i];
+
+        if (country.Mcc == mcc)
+        {
+            return { i, 0, true };
         }
     }
 

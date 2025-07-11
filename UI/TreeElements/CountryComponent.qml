@@ -29,5 +29,14 @@ RowLayout
 
         width: 24
         height: 24
+
+        onClicked: addDialog.open()
+    }
+
+    OperatorAddDialog
+    {
+        id: addDialog
+
+        dialogData: componentData
     }
 }

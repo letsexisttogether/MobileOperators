@@ -33,8 +33,8 @@ Dialog
                 height: 24
                 fillMode: Image.PreserveAspectFit
 
-                source: "file:///" + resourcesPath + "Operators/"
-                    + dialogData.mcc + "_" + dialogData.mnc + ".png"
+                source: "file:///" + resourcesPath + "Countries/"
+                    + componentData.countryCode + ".png"
 
                 horizontalAlignment: Image.AlignHCenter
             }
@@ -59,8 +59,40 @@ Dialog
             TextField
             {
                 id: name
-                placeholderText: dialogData.operatorName
+                placeholderText: "Name..."
                 Layout.fillWidth: true
+            }
+        }
+        RowLayout
+        {
+            spacing: 10
+            Label
+            {
+                text: "MNC:"
+                Layout.alignment: Qt.AlignVCenter
+            }
+            TextField
+            {
+                id: mcc
+                placeholderText: "Mcc..."
+                Layout.fillWidth: true
+
+                inputMethodHints: Qt.ImhDigitsOnly
+
+                onTextChanged:
+                {
+                    var filtered = text.replace(/\D/g, "")
+                    if (text !== filtered)
+                    {
+                        text = filtered
+                    }
+
+                    var val = parseInt(text)
+                    if (!isNaN(val) && val > 2147483647)
+                    {
+                        text = "2147483647"
+                    }
+                }
             }
         }
         RowLayout
@@ -77,31 +109,9 @@ Dialog
                 font.pixelSize: 14
                 verticalAlignment: Text.AlignVCenter
             }
-
-            ReliableImage
-            {
-                source: "file:///" + resourcesPath + "Countries/"
-                    + componentData.countryCode + ".png"
-                width: 24
-                height: 24
-                fillMode: Image.PreserveAspectFit
-                verticalAlignment: Image.AlignVCenter
-            }
-
-            Label
-            {
-                text: "MNC:"
-                Layout.alignment: Qt.AlignVCenter
-            }
-            Text
-            {
-                text: dialogData.mnc
-                font.pixelSize: 14
-                verticalAlignment: Text.AlignVCenter
-            }
         }
     }
 
-    onAccepted: combinedModel.UpdateOperator(
-        name.text, dialogData.mcc, dialogData.mnc)
+    onAccepted: combinedModel.AddOperator(
+        name.text, mcc, dialogData.mnc)
 }

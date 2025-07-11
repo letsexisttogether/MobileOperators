@@ -103,10 +103,26 @@ Qt::ItemFlags CombinedModel::flags(const QModelIndex& index) const
         :(Qt::NoItemFlags));
 }
 
-void CombinedModel::AddOperator(const qint32 mcc, const qint32 mnc,
-    const QString& name) noexcept
+void CombinedModel::AddOperator(const QString& name, const qint32 mcc,
+    const qint32 mnc) noexcept
 {
+    const auto searchResult = m_Storage.FindCountry(mcc);
 
+    if (!searchResult.Result)
+    {
+        return;
+    }
+
+    const qsizetype operatorsCount = m_Storage.GetData()
+        [searchResult.CountryIndex].Operators.size();
+
+    QModelIndex parent{ index(searchResult.CountryIndex, 0) };
+
+    beginInsertRows(parent, operatorsCount, operatorsCount);
+
+    m_Storage.AddOperator(searchResult, name, mcc, mnc);
+
+    endInsertRows();
 }
 
 void CombinedModel::UpdateOperator(const QString& name, const qint32 mcc,
@@ -118,6 +134,8 @@ void CombinedModel::UpdateOperator(const QString& name, const qint32 mcc,
     {
         return;
     }
+
+    m_Storage.UpdateOperator(searchResult, name);
 
     const QModelIndex changedIndex
     {
