@@ -58,7 +58,7 @@ Dialog
             }
             TextField
             {
-                id: nameField
+                id: name
                 placeholderText: dialogData.operatorName
                 Layout.fillWidth: true
             }
