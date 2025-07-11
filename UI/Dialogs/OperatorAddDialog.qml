@@ -40,7 +40,7 @@ Dialog
             }
             Label
             {
-                text: "Edit Operator:"
+                text: "Add Operator:"
                 font.bold: true
                 font.pixelSize: 20
 
