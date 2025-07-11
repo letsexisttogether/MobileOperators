@@ -1,26 +1,33 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
+
+import "../Dialogs"
+import "../Common"
 
 RowLayout
 {
-    Image
+    spacing: 16
+    Layout.fillWidth: true
+
+    ReliableImage
     {
-        source: "file:///D:/Projects/MobileOperators/Resources/Countries/"
+        source: "file:///" + resourcesPath + "Countries/"
             + componentData.countryCode + ".png"
         width: 24
         height: 24
         fillMode: Image.PreserveAspectFit
-
-        onStatusChanged:
-        {
-            if (status === Image.Error)
-            {
-                console.log(componentData.mcc)
-            }
-        }
     }
 
     Text { text: componentData.countryName }
     Text { text: componentData.countryCode }
     Text { text: componentData.mcc }
+
+    Button
+    {
+        text: "+"
+
+        width: 24
+        height: 24
+    }
 }
