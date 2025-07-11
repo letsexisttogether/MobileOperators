@@ -28,6 +28,4 @@ Additionally the project also contains 'SqlManager' — A singleton class that i
 - Edit existing operator names.
 - Delete operators from the list and database.
 
-## Examples
-
 

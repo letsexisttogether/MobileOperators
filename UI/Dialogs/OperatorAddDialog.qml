@@ -73,8 +73,8 @@ Dialog
             }
             TextField
             {
-                id: mcc
-                placeholderText: "Mcc..."
+                id: mnc
+                placeholderText: "mnc..."
                 Layout.fillWidth: true
 
                 inputMethodHints: Qt.ImhDigitsOnly
@@ -113,5 +113,5 @@ Dialog
     }
 
     onAccepted: combinedModel.AddOperator(
-        name.text, mcc, dialogData.mnc)
+        name.text, dialogData.mcc, mnc.text)
 }

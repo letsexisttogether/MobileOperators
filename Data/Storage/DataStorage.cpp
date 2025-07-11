@@ -56,7 +56,7 @@ DataStorage::DataStorage(QObject* const parent)
 bool DataStorage::AddOperator(const OperatorSearchResult& searchResult,
     const QString& name, const qint32 mcc, const qint32 mnc) noexcept
 {
-    const Operator op{ name, mcc, mnc };
+    const Operator op{ name, mnc, mcc };
     m_Countries[searchResult.CountryIndex].Operators.append(op);
 
     SqlManager& sqlManager = SqlManager::GetInstance();
@@ -93,11 +93,6 @@ bool DataStorage::UpdateOperator(const OperatorSearchResult& searchResult,
 bool DataStorage::RemoveOperator(const OperatorSearchResult& searchResult)
     noexcept
 {
-    if (!searchResult.Result)
-    {
-        qDebug() << "[Warning] There's no such operator";
-    }
-
     auto& country = m_Countries[searchResult.CountryIndex];
     const auto& op = country.Operators[searchResult.OperatorIndex];
 

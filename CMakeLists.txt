@@ -29,14 +29,22 @@ qt_add_qml_module(appMobileOperators
     VERSION 1.0
 
     SOURCES SQL/SqlManager.hpp SQL/SqlManager.cpp
-    SOURCES Model/CombinedModel.hpp Model/CombinedModel.cpp
+    SOURCES ViewModel/CombinedModel.hpp ViewModel/CombinedModel.cpp
 
+    SOURCES Data/Storage/DataStorage.hpp Data/Storage/DataStorage.cpp
+
+    SOURCES Data/Entities/Country.hpp
+    SOURCES Data/Entities/Operator.hpp
 
     QML_FILES Main.qml
-    QML_FILES UI/TextRectangle.qml
-    QML_FILES UI/OperatorDialog.qml
+
+    QML_FILES UI/Dialogs/OperatorEditDialog.qml
+
     QML_FILES UI/TreeElements/CountryComponent.qml
     QML_FILES UI/TreeElements/OperatorComponent.qml
+
+    QML_FILES UI/Common/ReliableImage.qml
+    QML_FILES UI/Dialogs/OperatorAddDialog.qml
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
