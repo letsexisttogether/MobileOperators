@@ -60,8 +60,8 @@ public slots:
 private:
     QVariant GetCountryData(const Country& country, const int role)
         const noexcept;
-    QVariant GetOperatorData(const Operator& op, const int role)
-        const noexcept;
+    QVariant GetOperatorData(const Country& country,
+        const Operator& op, const int role) const noexcept;
 
 private:
     DataStorage m_Storage{ this };

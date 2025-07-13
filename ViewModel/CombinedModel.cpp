@@ -79,7 +79,7 @@ QVariant CombinedModel::data(const QModelIndex& index, int role) const
     const Country& country = countries[id];
     const Operator& op = country.Operators[row];
 
-    return GetOperatorData(op, role);
+    return GetOperatorData(country, op, role);
 }
 
 QHash<int, QByteArray> CombinedModel::roleNames() const
@@ -195,9 +195,15 @@ QVariant CombinedModel::GetCountryData(const Country& country, const int role)
     return {};
 }
 
-QVariant CombinedModel::GetOperatorData(const Operator& op, const int role)
-    const noexcept
+QVariant CombinedModel::GetOperatorData(const Country& country,
+    const Operator& op, const int role) const noexcept
 {
+    if (auto variant = GetCountryData(country, role);
+        role != Role::Level && !variant.isNull())
+    {
+        return variant;
+    }
+
     switch (role)
     {
         case Role::OperatorName:
