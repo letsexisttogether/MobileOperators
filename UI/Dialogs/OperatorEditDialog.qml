@@ -6,7 +6,7 @@ import "../Common"
 
 Dialog
 {
-    required property var dialogData;
+    property var dialogData;
 
     width: 250
     height: 150

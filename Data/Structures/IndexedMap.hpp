@@ -51,8 +51,6 @@ private:
 
     QHash<Index, _KeyType> m_IndicesToKeys{};
     QHash<_KeyType, Index> m_KeysToIndices{};
-
-    QStack<Index> m_FreeIndices{};
 };
 
 template <class _Type, class _KeyType, _KeyType _Type::* _KeyName>
@@ -66,15 +64,9 @@ bool IndexedMap<_Type, _KeyType, _KeyName>::Insert(_Type&& element)
         return false;
     }
 
+    const Index nextIndex = Size();
+
     m_Data.insert(key, std::move(element));
-
-    if (m_FreeIndices.isEmpty())
-    {
-        m_FreeIndices.push(m_IndicesToKeys.size());
-    }
-
-    const Index nextIndex = m_FreeIndices.top();
-    m_FreeIndices.pop();
 
     m_IndicesToKeys.insert(nextIndex, key);
     m_KeysToIndices.insert(key, nextIndex);
@@ -95,12 +87,23 @@ bool IndexedMap<_Type, _KeyType, _KeyName>::Remove
 
     const Index index = m_KeysToIndices[key];
 
-    if (!m_KeysToIndices.remove(key) || m_IndicesToKeys.remove(index))
+    if (!m_KeysToIndices.remove(key) || !m_IndicesToKeys.remove(index))
     {
         return false;
     }
 
-    m_FreeIndices.push(index);
+    // 0, 1, 3, 4, 5
+    // 3, 1, 10, 4, 2
+
+    for (Index i = index + 1; i <= Size(); ++i)
+    {
+        const _KeyType& key = m_IndicesToKeys[i];
+
+        m_IndicesToKeys[i - 1] = key;
+        m_KeysToIndices[key] = i - 1;
+    }
+
+    m_IndicesToKeys.remove(m_IndicesToKeys.size());
 
     return true;
 }

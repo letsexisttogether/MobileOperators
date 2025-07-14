@@ -30,7 +30,13 @@ RowLayout
         width: 32
         height: 32
 
-        onClicked: operatorEditDialog.open()
+        onClicked:
+        {
+            if (!dialogLoader.active)
+            {
+                dialogLoader.active = true
+            }
+        }
     }
     Button
     {
@@ -45,10 +51,19 @@ RowLayout
             componentData.mnc)
     }
 
-    // TODO: Fix using Loader later
-    OperatorEditDialog
+    Loader
     {
-        id: operatorEditDialog
-        dialogData: componentData
+        id: dialogLoader
+
+        active: false
+        source: "../Dialogs/OperatorEditDialog.qml"
+        visible: item !== null
+        onLoaded:
+        {
+            item.dialogData = componentData
+            item.open()
+            item.onAccepted.connect(() => dialogLoader.active = false)
+            item.onRejected.connect(() => dialogLoader.active = false)
+        }
     }
 }
