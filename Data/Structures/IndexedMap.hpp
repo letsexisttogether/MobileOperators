@@ -157,7 +157,7 @@ typename IndexedMap<_Type, _KeyType, _KeyName>::OptionalConstRef
 IndexedMap<_Type, _KeyType, _KeyName>::GetElementByIndex
     (const Index index) const noexcept
 {
-    if (index >= 0 && index < m_Data.size())
+    if (m_IndicesToKeys.contains(index))
     {
         return GetElementByKey(m_IndicesToKeys[index]);
     }

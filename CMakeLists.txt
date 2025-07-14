@@ -31,10 +31,13 @@ qt_add_qml_module(appMobileOperators
     SOURCES SQL/SqlManager.hpp SQL/SqlManager.cpp
     SOURCES ViewModel/CombinedModel.hpp ViewModel/CombinedModel.cpp
 
+    SOURCES Data/Structures/IndexedMap.hpp
+
     SOURCES Data/Storage/DataStorage.hpp Data/Storage/DataStorage.cpp
 
     SOURCES Data/Entities/Country.hpp
     SOURCES Data/Entities/Operator.hpp
+
 
     QML_FILES Main.qml
 

@@ -25,15 +25,9 @@ public:
     explicit DataStorage(QObject* const parent = nullptr);
     ~DataStorage() = default;
 
-    bool AddOperator(const OperatorSearchResult& searchResult,
-        const QString& name, const qint32 mcc, const qint32 mnc) noexcept;
-    bool RemoveOperator(const OperatorSearchResult& searchResult) noexcept;
-    bool UpdateOperator(const OperatorSearchResult& searchResult,
-        const QString& name) noexcept;
-
-    OperatorSearchResult FindOperator(const qint32 mcc, const qint32 mnc)
-        const noexcept;
-    OperatorSearchResult FindCountry(const qint32 mcc) const noexcept;
+    bool AddOperator(Operator&& op) noexcept;
+    bool RemoveOperator(const Operator& op) noexcept;
+    bool UpdateOperator(const Operator& op) noexcept;
 
     const DataStructure& GetData() const noexcept;
 

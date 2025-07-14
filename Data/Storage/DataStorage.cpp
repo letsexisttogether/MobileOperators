@@ -53,14 +53,17 @@ DataStorage::DataStorage(QObject* const parent)
     }
 }
 
-bool DataStorage::AddOperator(const OperatorSearchResult& searchResult,
-    const QString& name, const qint32 mcc, const qint32 mnc) noexcept
+bool DataStorage::AddOperator(Operator&& op) noexcept
 {
-    Operator op{ name, mnc, mcc };
+    const qint32 mcc = op.Mcc;
 
-    Country& country = m_Data.Unpack(m_Data.GetElementByKey(mcc));
+    if (!m_Data.DoesContainKey(mcc))
+    {
+        qDebug() << "[Error] Provided MCC " << mcc
+            << " does not belong to any country";
 
-    country.Operators.Insert(std::move(op));
+        return false;
+    }
 
     SqlManager& sqlManager = SqlManager::GetInstance();
 
@@ -70,37 +73,35 @@ bool DataStorage::AddOperator(const OperatorSearchResult& searchResult,
         .arg(op.Mnc)
         .arg(op.Name));
 
-    return true;
+    auto& country = m_Data.Unpack(m_Data.GetElementByKey(mcc));
+
+    return country.Operators.Insert(std::move(op));
 }
 
-bool DataStorage::UpdateOperator(const OperatorSearchResult& searchResult,
-    const QString& name) noexcept
+bool DataStorage::RemoveOperator(const Operator& op) noexcept
 {
-    /*
-    auto& op = m_Countries[searchResult.CountryIndex]
-        .Operators[searchResult.OperatorIndex];
+    const qint32 mcc = op.Mcc;
 
-    op.Name = name;
+    if (!m_Data.DoesContainKey(mcc))
+    {
+        qDebug() << "[Error] Provided MCC " << mcc
+            << " does not belong to any country";
 
-    SqlManager& sqlManager = SqlManager::GetInstance();
+        return false;
+    }
 
-    sqlManager.ExecuteQuery(QString{ "UPDATE operators "
-        "SET name = '%1' "
-        "WHERE mcc = %2 AND mnc = %3" }
-        .arg(op.Name)
-        .arg(op.Mcc)
-        .arg(op.Mnc));
+    auto& country = m_Data.Unpack(m_Data.GetElementByKey(mcc));
+    auto& operators = country.Operators;
 
-*/
-    return true;
-}
+    const qint32 mnc = op.Mnc;
 
-bool DataStorage::RemoveOperator(const OperatorSearchResult& searchResult)
-    noexcept
-{
-    /*
-    auto& country = m_Countries[searchResult.CountryIndex];
-    const auto& op = country.Operators[searchResult.OperatorIndex];
+    if (!operators.DoesContainKey(mnc))
+    {
+        qDebug() << "[Error] Provided MNC " << mnc
+            << " does not belong to any operator";
+
+        return false;
+    }
 
     SqlManager& sqlManager = SqlManager::GetInstance();
 
@@ -109,43 +110,50 @@ bool DataStorage::RemoveOperator(const OperatorSearchResult& searchResult)
         .arg(op.Mcc)
         .arg(op.Mnc));
 
-    country.Operators.removeAt(searchResult.OperatorIndex);
-*/
+    return operators.Remove(mnc);;
+}
+
+bool DataStorage::UpdateOperator(const Operator& op) noexcept
+{
+    const qint32 mcc = op.Mcc;
+
+    if (!m_Data.DoesContainKey(mcc))
+    {
+        qDebug() << "[Error] Provided MCC " << mcc
+            << " does not belong to any country";
+
+        return false;
+    }
+
+    auto& country = m_Data.Unpack(m_Data.GetElementByKey(mcc));
+    auto& operators = country.Operators;
+
+    const qint32 mnc = op.Mnc;
+
+    if (!operators.DoesContainKey(mnc))
+    {
+        qDebug() << "[Error] Provided MNC " << mnc
+            << " does not belong to any operator";
+
+        return false;
+    }
+
+    operators.Unpack(operators.GetElementByKey(mnc)) = op;
+
+    SqlManager& sqlManager = SqlManager::GetInstance();
+
+    sqlManager.ExecuteQuery(QString{
+            "UPDATE operators "
+            "SET name = '%1' "
+            "WHERE mcc = %2 AND mnc = %3" }
+        .arg(op.Name)
+        .arg(op.Mcc)
+        .arg(op.Mnc));
+
     return true;
 }
 
 const DataStorage::DataStructure& DataStorage::GetData() const noexcept
 {
     return m_Data;
-}
-
-DataStorage::OperatorSearchResult DataStorage::FindOperator
-    (const qint32 mcc, const qint32 mnc) const noexcept
-{
-    if (!m_Data.DoesContainKey(mcc))
-    {
-        return {};
-    }
-
-    const auto& operators = m_Data.Unpack(m_Data.GetElementByKey(mcc))
-        .Operators;
-
-    if (!operators.DoesContainKey(mnc))
-    {
-        return {};
-    }
-
-    return { m_Data.GetIndex(mcc), operators.GetIndex(mnc), true };
-}
-
-
-DataStorage::OperatorSearchResult DataStorage::FindCountry
-    (const qint32 mcc) const noexcept
-{
-    if (!m_Data.DoesContainKey(mcc))
-    {
-        return {};
-    }
-
-    return { m_Data.GetIndex(mcc), 0, true };
 }
