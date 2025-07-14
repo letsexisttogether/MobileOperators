@@ -4,10 +4,14 @@
 #include <QObject>
 
 #include "Data/Entities/Country.hpp"
+#include "Data/Structures/IndexedMap.hpp"
 
 class DataStorage : public QObject
 {
     Q_OBJECT
+
+public:
+    using DataStructure = IndexedMap<Country, qint32, &Country::Mcc>;
 
 public:
     struct OperatorSearchResult
@@ -31,10 +35,10 @@ public:
         const noexcept;
     OperatorSearchResult FindCountry(const qint32 mcc) const noexcept;
 
-    const QList<Country>& GetData() const noexcept;
+    const DataStructure& GetData() const noexcept;
 
 private:
-    QList<Country> m_Countries{};
+    DataStructure m_Data{};
 };
 
 #endif

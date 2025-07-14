@@ -39,26 +39,28 @@ DataStorage::DataStorage(QObject* const parent)
 
         while (operatorQuery.next())
         {
-            const Operator op
+            Operator op
             {
                 operatorQuery.value(0).toString(),
                 operatorQuery.value(1).toInt(),
                 country.Mcc
             };
 
-            country.Operators.append(op);
+            country.Operators.Insert(std::move(op));
         }
 
-        m_Countries.append(country);
+        m_Data.Insert(std::move(country));
     }
 }
 
 bool DataStorage::AddOperator(const OperatorSearchResult& searchResult,
     const QString& name, const qint32 mcc, const qint32 mnc) noexcept
 {
-    const Operator op{ name, mnc, mcc };
+    Operator op{ name, mnc, mcc };
 
-    m_Countries[searchResult.CountryIndex].Operators.append(op);
+    Country& country = m_Data.Unpack(m_Data.GetElementByKey(mcc));
+
+    country.Operators.Insert(std::move(op));
 
     SqlManager& sqlManager = SqlManager::GetInstance();
 
@@ -74,6 +76,7 @@ bool DataStorage::AddOperator(const OperatorSearchResult& searchResult,
 bool DataStorage::UpdateOperator(const OperatorSearchResult& searchResult,
     const QString& name) noexcept
 {
+    /*
     auto& op = m_Countries[searchResult.CountryIndex]
         .Operators[searchResult.OperatorIndex];
 
@@ -88,12 +91,14 @@ bool DataStorage::UpdateOperator(const OperatorSearchResult& searchResult,
         .arg(op.Mcc)
         .arg(op.Mnc));
 
+*/
     return true;
 }
 
 bool DataStorage::RemoveOperator(const OperatorSearchResult& searchResult)
     noexcept
 {
+    /*
     auto& country = m_Countries[searchResult.CountryIndex];
     const auto& op = country.Operators[searchResult.OperatorIndex];
 
@@ -105,54 +110,42 @@ bool DataStorage::RemoveOperator(const OperatorSearchResult& searchResult)
         .arg(op.Mnc));
 
     country.Operators.removeAt(searchResult.OperatorIndex);
-
+*/
     return true;
 }
 
-const QList<Country>& DataStorage::GetData() const noexcept
+const DataStorage::DataStructure& DataStorage::GetData() const noexcept
 {
-    return m_Countries;
+    return m_Data;
 }
 
 DataStorage::OperatorSearchResult DataStorage::FindOperator
     (const qint32 mcc, const qint32 mnc) const noexcept
 {
-    for (qsizetype i = 0; i < m_Countries.size(); ++i)
+    if (!m_Data.DoesContainKey(mcc))
     {
-        const auto& country = m_Countries[i];
-
-        if (country.Mcc != mcc)
-        {
-            continue;
-        }
-
-        const auto& operators = country.Operators;
-
-        for (qsizetype j = 0; j < operators.size(); ++j)
-        {
-            if (operators[j].Mnc == mnc)
-            {
-                return { i, j, true };
-            }
-        }
+        return {};
     }
 
-    return {};
+    const auto& operators = m_Data.Unpack(m_Data.GetElementByKey(mcc))
+        .Operators;
+
+    if (!operators.DoesContainKey(mnc))
+    {
+        return {};
+    }
+
+    return { m_Data.GetIndex(mcc), operators.GetIndex(mnc), true };
 }
 
 
 DataStorage::OperatorSearchResult DataStorage::FindCountry
     (const qint32 mcc) const noexcept
 {
-    for (qsizetype i = 0; i < m_Countries.size(); ++i)
+    if (!m_Data.DoesContainKey(mcc))
     {
-        const auto& country = m_Countries[i];
-
-        if (country.Mcc == mcc)
-        {
-            return { i, 0, true };
-        }
+        return {};
     }
 
-    return {};
+    return { m_Data.GetIndex(mcc), 0, true };
 }

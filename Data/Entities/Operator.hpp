@@ -2,6 +2,8 @@
 #define OPERATOR_HPP
 
 #include <QString>
+#include <QtTypes>
+#include <QHash>
 
 struct Operator
 {

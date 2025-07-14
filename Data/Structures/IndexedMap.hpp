@@ -30,15 +30,18 @@ public:
     const _Type& Unpack(OptionalConstRef value) const noexcept;
     _Type& Unpack(OptionalRef value) noexcept;
 
-    OptionalConstRef GetElement(const _KeyType& key) const noexcept;
-    OptionalRef GetElement(const _KeyType& key) noexcept;
+    OptionalConstRef GetElementByKey(const _KeyType& key) const noexcept;
+    OptionalRef GetElementByKey(const _KeyType& key) noexcept;
 
-    OptionalConstRef GetElement(const Index index) const noexcept;
-    OptionalRef GetElement(const Index index) noexcept;
+    OptionalConstRef GetElementByIndex(const Index index) const noexcept;
+    OptionalRef GetElementByIndex(const Index index) noexcept;
 
     Index GetIndex(const _KeyType& key) const noexcept;
 
-    bool DoesContain(const _KeyType& key) const noexcept;
+    Index Size() const noexcept;
+
+    bool DoesContainKey(const _KeyType& key) const noexcept;
+    bool DoesContainIndex(const Index index) const noexcept;
 
     IndexedMap& operator = (const IndexedMap&) = default;
     IndexedMap& operator = (IndexedMap&&) = default;
@@ -58,7 +61,7 @@ bool IndexedMap<_Type, _KeyType, _KeyName>::Insert(_Type&& element)
 {
     const _KeyType& key = element.*_KeyName;
 
-    if (DoesContain(key))
+    if (DoesContainKey(key))
     {
         return false;
     }
@@ -118,7 +121,7 @@ _Type& IndexedMap<_Type, _KeyType, _KeyName>::Unpack
 
 template <class _Type, class _KeyType, _KeyType _Type::* _KeyName>
 typename IndexedMap<_Type, _KeyType, _KeyName>::OptionalConstRef
-IndexedMap<_Type, _KeyType, _KeyName>::GetElement
+IndexedMap<_Type, _KeyType, _KeyName>::GetElementByKey
     (const _KeyType& key) const noexcept
 {
     if (const auto iter = m_Data.find(key);
@@ -135,11 +138,11 @@ IndexedMap<_Type, _KeyType, _KeyName>::GetElement
 
 template <class _Type, class _KeyType, _KeyType _Type::* _KeyName>
 typename IndexedMap<_Type, _KeyType, _KeyName>::OptionalRef
-IndexedMap<_Type, _KeyType, _KeyName>::GetElement
+IndexedMap<_Type, _KeyType, _KeyName>::GetElementByKey
     (const _KeyType& key) noexcept
 {
     const auto& constThis = static_cast<const IndexedMap*>(this);
-    const auto& result = constThis->GetElement(key);
+    const auto& result = constThis->GetElementByKey(key);
 
     if (result.has_value())
     {
@@ -151,12 +154,12 @@ IndexedMap<_Type, _KeyType, _KeyName>::GetElement
 
 template <class _Type, class _KeyType, _KeyType _Type::* _KeyName>
 typename IndexedMap<_Type, _KeyType, _KeyName>::OptionalConstRef
-IndexedMap<_Type, _KeyType, _KeyName>::GetElement
+IndexedMap<_Type, _KeyType, _KeyName>::GetElementByIndex
     (const Index index) const noexcept
 {
     if (index >= 0 && index < m_Data.size())
     {
-        return GetElement(m_IndicesToKeys[index]);
+        return GetElementByKey(m_IndicesToKeys[index]);
     }
 
     qDebug() << "[Error] The index " << index << " is invalid";
@@ -166,11 +169,11 @@ IndexedMap<_Type, _KeyType, _KeyName>::GetElement
 
 template <class _Type, class _KeyType, _KeyType _Type::* _KeyName>
 typename IndexedMap<_Type, _KeyType, _KeyName>::OptionalRef
-IndexedMap<_Type, _KeyType, _KeyName>::GetElement
+IndexedMap<_Type, _KeyType, _KeyName>::GetElementByIndex
     (const Index index) noexcept
 {
     const auto& constThis = static_cast<const IndexedMap*>(this);
-    const auto& result = constThis->GetElement(index);
+    const auto& result = constThis->GetElementByIndex(index);
 
     if (result.has_value())
     {
@@ -197,10 +200,24 @@ IndexedMap<_Type, _KeyType, _KeyName>::GetIndex(const _KeyType& key)
 }
 
 template <class _Type, class _KeyType, _KeyType _Type::* _KeyName>
-bool IndexedMap<_Type, _KeyType, _KeyName>::DoesContain
+typename IndexedMap<_Type, _KeyType, _KeyName>::Index
+IndexedMap<_Type, _KeyType, _KeyName>::Size() const noexcept
+{
+    return m_Data.size();
+}
+
+template <class _Type, class _KeyType, _KeyType _Type::* _KeyName>
+bool IndexedMap<_Type, _KeyType, _KeyName>::DoesContainKey
     (const _KeyType& key) const noexcept
 {
-    return m_Data.contains(key);
+    return m_KeysToIndices.contains(key);
+}
+
+template <class _Type, class _KeyType, _KeyType _Type::* _KeyName>
+bool IndexedMap<_Type, _KeyType, _KeyName>::DoesContainIndex
+    (const Index index) const noexcept
+{
+    return m_IndicesToKeys.contains(index);
 }
 
 #endif

@@ -3,6 +3,7 @@
 
 #include <QList>
 
+#include "Data/Structures/IndexedMap.hpp"
 #include "Operator.hpp"
 
 struct Country
@@ -12,7 +13,8 @@ struct Country
 
     qint32 Mcc{};
 
-    QList<Operator> Operators{};
+    IndexedMap<Operator, qint32, &Operator::Mnc> Operators{};
+
 };
 
 #endif
