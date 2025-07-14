@@ -4,6 +4,8 @@
 
 Mobile Operators is a Qt-based desktop application designed to display and manage a list of mobile network operators organized by their countries. The application allows users to view, add, edit, and delete operators through a modern user interface built with QML and QtQuick.
 
+For updated version with added optimization techniques and current bugs fixed check branch *update* 
+
 ## Technologies Used
 
 - C++17 — Core logic and data structures
