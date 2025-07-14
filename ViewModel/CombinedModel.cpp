@@ -11,13 +11,14 @@ QModelIndex CombinedModel::index(int row, int column,
 {
     const auto& countries = m_Storage.GetData();
 
-    if (!index.isValid() && row < countries.size())
+    if (!index.isValid() && countries.DoesContainIndex(row))
     {
         return createIndex(row, column, -1);
     }
 
     if (index.internalId() == m_CountryIndex
-        && row < countries[index.row()].Operators.size())
+        && countries.Unpack(countries.GetElementByIndex(index.row()))
+            .Operators.DoesContainIndex(row))
     {
         return createIndex(row, column, index.row());
     }
@@ -41,11 +42,16 @@ int CombinedModel::rowCount(const QModelIndex& index) const
 
     if (!index.isValid())
     {
-        return countries.size();
+        return countries.Size();
     }
-    else if (index.internalId() == m_CountryIndex)
+    else if (const int row = index.row();
+        index.internalId() == m_CountryIndex
+        && countries.DoesContainIndex(row))
     {
-        return countries[index.row()].Operators.size();
+        const auto& country = countries.Unpack(countries
+            .GetElementByIndex(row));
+
+        return country.Operators.Size();
     }
 
     return {};
@@ -55,7 +61,6 @@ int CombinedModel::columnCount(const QModelIndex& index) const
 {
     return 1;
 }
-
 
 QVariant CombinedModel::data(const QModelIndex& index, int role) const
 {
@@ -71,15 +76,49 @@ QVariant CombinedModel::data(const QModelIndex& index, int role) const
 
     if (id == m_CountryIndex)
     {
-        const Country& country = countries[row];
+        if (countries.DoesContainIndex(row))
+        {
+            const Country& country = countries.Unpack(
+                countries.GetElementByIndex(row));
 
-        return GetCountryData(country, role);
+            return GetCountryData(country, role);
+        }
+        else
+        {
+            qDebug() << "[Error] The index for country " << row
+                << " is invalid";
+
+            return {};
+        }
     }
 
-    const Country& country = countries[id];
-    const Operator& op = country.Operators[row];
+    if (countries.DoesContainIndex(id))
+    {
+        const Country& country = countries.Unpack(countries
+            .GetElementByIndex(id));
 
-    return GetOperatorData(country, op, role);
+        const auto& operators = country.Operators;
+
+        if (operators.DoesContainIndex(row))
+        {
+            const Operator& op = operators.Unpack(operators
+                .GetElementByIndex(row));
+
+            return GetOperatorData(country, op, role);
+        }
+        else
+        {
+            qDebug() << "[Error] The index for country: " << id
+                << " is invalid";
+
+            return {};
+        }
+    }
+
+    qDebug() << "[Error] The index for country: " << id
+        << " is invalid";
+
+    return {};
 }
 
 QHash<int, QByteArray> CombinedModel::roleNames() const
@@ -100,12 +139,13 @@ QHash<int, QByteArray> CombinedModel::roleNames() const
 Qt::ItemFlags CombinedModel::flags(const QModelIndex& index) const
 {
     return ((index.isValid()) ? (Qt::ItemIsEnabled | Qt::ItemIsSelectable)
-        :(Qt::NoItemFlags));
+        : (Qt::NoItemFlags));
 }
 
 void CombinedModel::AddOperator(const QString& name, const qint32 mcc,
     const qint32 mnc) noexcept
 {
+    /*
     const auto searchResult = m_Storage.FindCountry(mcc);
 
     if (!searchResult.Result)
@@ -128,11 +168,13 @@ void CombinedModel::AddOperator(const QString& name, const qint32 mcc,
     {
         endInsertRows();
     }
+    */
 }
 
 void CombinedModel::UpdateOperator(const QString& name, const qint32 mcc,
     const qint32 mnc) noexcept
 {
+    /*
     const auto searchResult = m_Storage.FindOperator(mcc, mnc);
 
     if (!searchResult.Result)
@@ -152,10 +194,12 @@ void CombinedModel::UpdateOperator(const QString& name, const qint32 mcc,
     };
 
     emit dataChanged(changedIndex, changedIndex, { Role::OperatorName });
+    */
 }
 
 void CombinedModel::RemoveOperator(const qint32 mcc, const qint32 mnc) noexcept
 {
+    /*
     const auto searchResult = m_Storage.FindOperator(mcc, mnc);
 
     if (!searchResult.Result)
@@ -175,6 +219,7 @@ void CombinedModel::RemoveOperator(const qint32 mcc, const qint32 mnc) noexcept
     {
         endRemoveRows();
     }
+    */
 }
 
 QVariant CombinedModel::GetCountryData(const Country& country, const int role)
